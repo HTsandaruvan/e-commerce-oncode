@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 
 const categories = [
-    { id: 'electronics', name: 'Electronics' },
+    { id: 'smartphones', name: 'Smart Phones' },
     { id: 'clothing', name: 'Clothing' },
     { id: 'books', name: 'Books' },
     { id: 'home', name: 'Home & Kitchen' },
@@ -20,16 +20,33 @@ const ratings = [
     { id: '1', name: '1 Star & Up' },
 ];
 
+const brandMap = {
+    smartphones: ['Apple', 'Samsung', 'Sony', 'Huawei'],
+    clothing: ['Nike', 'Adidas', 'Puma'],
+    books: ['Penguin', 'HarperCollins'],
+    home: ['IKEA', 'Philips'],
+    beauty: ['L\'Oréal', 'Nivea'],
+};
+
+
 export default function Filter() {
     const [priceRange, setPriceRange] = useState([0, 1000]);
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedRatings, setSelectedRatings] = useState([]);
+    const [selectedBrands, setSelectedBrands] = useState([]);
 
     const handleCategoryChange = (categoryId) => {
         setSelectedCategories(prev =>
             prev.includes(categoryId)
                 ? prev.filter(id => id !== categoryId)
                 : [...prev, categoryId]
+        );
+    };
+    const handleBrandChange = (brandName) => {
+        setSelectedBrands(prev =>
+            prev.includes(brandName)
+                ? prev.filter(name => name !== brandName)
+                : [...prev, brandName]
         );
     };
 
@@ -46,17 +63,19 @@ export default function Filter() {
     };
 
     const handleReset = () => {
-        setPriceRange([0, 1000]);
+        setPriceRange([0, 10000]);
         setSelectedCategories([]);
         setSelectedRatings([]);
     };
+    const availableBrands = selectedCategories.flatMap(cat => brandMap[cat] || []);
+    const uniqueBrands = [...new Set(availableBrands)];
 
     return (
-        <div className="space-y-6 p-4 bg-gray-50 rounded-lg">
+        <div className="space-y-6 p-4 bg-color1 rounded-lg">
             <div className="flex justify-between items-center">
-                <h3 className="font-semibold text-lg">Filters</h3>
+                <h3 className="font-semibold text-lg"></h3>
                 <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={handleReset}
                 >
@@ -66,18 +85,40 @@ export default function Filter() {
 
             <div>
                 <h4 className="font-medium mb-3">Price Range</h4>
+                <div className="mb-3 flex items-center gap-2 text-sm text-gray-600">
+                    <input
+                        type="number"
+                        value={priceRange[0]}
+                        onChange={(e) => {
+                            const min = Math.max(0, Number(e.target.value));
+                            setPriceRange([min, priceRange[1]]);
+                        }}
+                        className="w-full rounded border px-2 py-1"
+                        placeholder="Min"
+                    />
+                    <span>-</span>
+                    <input
+                        type="number"
+                        value={priceRange[1]}
+                        onChange={(e) => {
+                            const max = Math.min(10000, Number(e.target.value));
+                            setPriceRange([priceRange[0], max]);
+                        }}
+                        className="w-full rounded border px-2 py-1"
+                        placeholder="Max"
+                    />
+                </div>
                 <Slider
                     min={0}
-                    max={1000}
+                    max={100000}
                     step={10}
                     value={priceRange}
                     onValueChange={handlePriceChange}
                     className="w-full"
                 />
-                <div className="flex justify-between mt-2 text-sm text-gray-600">
-                    <span>${priceRange[0]}</span>
-                    <span>${priceRange[1]}</span>
-                </div>
+
+
+
             </div>
 
             <div>
@@ -98,6 +139,26 @@ export default function Filter() {
                     ))}
                 </div>
             </div>
+            {uniqueBrands.length > 0 && (
+                <div>
+                    <h4 className="font-medium mb-3">Brands</h4>
+                    <div className="space-y-2">
+                        {uniqueBrands.map((brand) => (
+                            <div key={brand} className="flex items-center">
+                                <Checkbox
+                                    id={`brand-${brand}`}
+                                    checked={selectedBrands.includes(brand)}
+                                    onCheckedChange={() => handleBrandChange(brand)}
+                                    className="mr-2"
+                                />
+                                <label htmlFor={`brand-${brand}`} className="text-sm">
+                                    {brand}
+                                </label>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div>
                 <h4 className="font-medium mb-3">Customer Rating</h4>
@@ -121,6 +182,7 @@ export default function Filter() {
             <Button className="w-full" onClick={() => console.log({
                 priceRange,
                 selectedCategories,
+                selectedBrands,
                 selectedRatings
             })}>
                 Apply Filters

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,8 +21,18 @@ const sortOptions = [
 ];
 
 export default function Sort() {
-    const [selectedSort, setSelectedSort] = useState(sortOptions[0].id);
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const [selectedSort, setSelectedSort] = useState(searchParams.get('sort') || sortOptions[0].id);
     const [isOpen, setIsOpen] = useState(false);
+
+    const handleSortChange = (sortId) => {
+        setSelectedSort(sortId);
+        const params = new URLSearchParams(searchParams);
+        params.set('sort', sortId);
+        params.set('page', '1'); // Reset to first page when changing sort
+        router.replace(`?${params.toString()}`);
+    };
 
     const selectedLabel = sortOptions.find(opt => opt.id === selectedSort)?.label;
 
@@ -33,12 +44,12 @@ export default function Sort() {
                     Sort by: {selectedLabel}
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
+            <DropdownMenuContent align="end" className="w-[200px] bg-color1">
                 {sortOptions.map((option) => (
                     <DropdownMenuItem
                         key={option.id}
-                        onClick={() => setSelectedSort(option.id)}
-                        className={selectedSort === option.id ? 'bg-gray-100' : ''}
+                        onClick={() => handleSortChange(option.id)}
+                        className={selectedSort === option.id ? 'bg-primary' : ''}
                     >
                         {option.label}
                     </DropdownMenuItem>

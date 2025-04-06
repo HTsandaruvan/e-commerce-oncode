@@ -8,7 +8,7 @@ export const metadata = {
     description: 'Browse our product collection',
 };
 
-export default function ProductListing() {
+export default function ProductListing({ searchParams }) {
     const breadcrumbItems = [
         { label: 'Home', href: '/' },
         { label: 'Products', href: '/products' }
@@ -24,10 +24,10 @@ export default function ProductListing() {
                     <Filter />
                 </div>
                 <div className="md:w-3/4">
-                    <div className="mb-6">
+                    <div className="flex justify-end mb-6">
                         <Sort />
                     </div>
-                    <ProductGrid />
+                    <ProductGrid searchParams={searchParams} />
                 </div>
             </div>
         </div>
